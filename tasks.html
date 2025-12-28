@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor Tareas PWA - JacLab</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f3">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: system-ui, sans-serif; background: #0a1a0a; color: #e0ffe0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        input { width: 100%; padding: 12px; background: rgba(0,255,0,0.1); border: 1px solid #0f3; border-radius: 8px; color: #e0ffe0; }
+        button { background: #0f3; border: none; padding: 12px 20px; color: #000; border-radius: 8px; cursor: pointer; margin: 5px; }
+        .task { background: rgba(0,255,0,0.1); margin: 10px 0; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .completed { opacity: 0.6; text-decoration: line-through; }
+        @media (max-width: 600px) { body { padding: 10px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 Gestor Tareas PWA</h1>
+        <input type="text" id="taskInput" placeholder="Nueva tarea...">
+        <button onclick="addTask()">➕ Añadir</button>
+        <div id="taskList"></div>
+        <p><small>Funciona offline • Responsive • DAW Project</small></p>
+    </div>
+
+    <script>
+        const taskInput = document.getElementById('taskInput');
+        const taskList = document.getElementById('taskList');
+
+        // Cargar tareas
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+        function renderTasks() {
+            taskList.innerHTML = '';
+            tasks.forEach((task, index) => {
+                const div = document.createElement('div');
+                div.className = `task ${task.completed ? 'completed' : ''}`;
+                div.innerHTML = `
+                    <span onclick="toggleTask(${index})">${task.text}</span>
+                    <div>
+                        <button onclick="toggleTask(${index})">${task.completed ? '↩️' : '✅'}</button>
+                        <button onclick="deleteTask(${index})">🗑️</button>
+                    </div>
+                `;
+                taskList.appendChild(div);
+            });
+        }
+
+        function addTask() {
+            const text = taskInput.value.trim();
+            if (text) {
+                tasks.push({ text, completed: false });
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+                taskInput.value = '';
+                renderTasks();
+            }
+        }
+
+        function toggleTask(index) {
+            tasks[index].completed = !tasks[index].completed;
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            renderTasks();
+        }
+
+        function deleteTask(index) {
+            tasks.splice(index, 1);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            renderTasks();
+        }
+
+        // Enter para añadir
+        taskInput.addEventListener('keypress', e => e.key === 'Enter' && addTask());
+        renderTasks();
+    </script>
+</body>
+</html>
